@@ -1,0 +1,19 @@
+{
+  "id": "Form_HRApproval",
+  "type": "default",
+  "schemaVersion": 16,
+  "components": [
+    { "type": "textfield", "id": "field_hr_empName", "key": "employeeName",  "label": "Employee Name", "disabled": true },
+    { "type": "textfield", "id": "field_hr_dept",    "key": "department",   "label": "Department",    "disabled": true },
+    { "type": "textfield", "id": "field_hr_email",   "key": "employeeEmail","label": "Email",         "disabled": true },
+    { "type": "separator", "id": "sep_1" },
+    { "type": "select", "id": "field_hrDecision", "key": "hrApprovalDecision", "label": "Approval Decision",
+      "validate": { "required": true },
+      "values": [
+        { "label": "Approved — proceed with onboarding", "value": "APPROVED" },
+        { "label": "Rejected — do not proceed",          "value": "REJECTED" }
+      ]
+    },
+    { "type": "textarea", "id": "field_hrComments", "key": "hrComments", "label": "Comments (optional)" }
+  ]
+}

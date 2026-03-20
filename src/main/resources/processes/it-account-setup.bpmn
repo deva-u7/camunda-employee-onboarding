@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_ITSetup" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+  <bpmn:error id="Error_AccountFailed" name="account-creation-failed" errorCode="ACCOUNT_CREATION_FAILED" />
+  <bpmn:process id="it-account-setup" name="IT Account Setup" isExecutable="true">
+    <bpmn:extensionElements>
+      <zeebe:userTaskForm id="Form_ManualIT">
+        {"components":[{"label":"System","key":"system","id":"field_it_system","type":"textfield","disabled":true},{"label":"Resolution Notes","key":"resolutionNotes","id":"field_resolutionNotes","type":"textarea","validate":{"required":true}},{"label":"Manual Account Created","key":"manualAccountCreated","id":"field_manualAccountCreated","type":"checkbox"}],"id":"Form_ManualIT","type":"default","schemaVersion":16}
+      </zeebe:userTaskForm>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_IT" name="Start IT Setup">
+      <bpmn:outgoing>Flow_IT_Start_to_Create</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_IT_Start_to_Create" sourceRef="StartEvent_IT" targetRef="Task_CreateAccount" />
+    <bpmn:serviceTask id="Task_CreateAccount" name="Create System Account">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-system-account" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=system" target="system" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_IT_Start_to_Create</bpmn:incoming>
+      <bpmn:outgoing>Flow_Create_to_End</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics>
+        <bpmn:extensionElements>
+          <zeebe:loopCharacteristics inputCollection="=systems" inputElement="system" />
+        </bpmn:extensionElements>
+      </bpmn:multiInstanceLoopCharacteristics>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryError_AccountFail" name="Account Creation Failed" attachedToRef="Task_CreateAccount">
+      <bpmn:outgoing>Flow_Error_to_ManualIT</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrDef_AccountFail" errorRef="Error_AccountFailed" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_Error_to_ManualIT" sourceRef="BoundaryError_AccountFail" targetRef="Task_ManualITSetup" />
+    <bpmn:userTask id="Task_ManualITSetup" name="Manual IT Account Setup">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_ManualIT" />
+        <zeebe:assignmentDefinition candidateGroups="it-team" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Error_to_ManualIT</bpmn:incoming>
+      <bpmn:outgoing>Flow_ManualIT_to_End</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_Create_to_End" sourceRef="Task_CreateAccount" targetRef="EndEvent_IT" />
+    <bpmn:sequenceFlow id="Flow_ManualIT_to_End" sourceRef="Task_ManualITSetup" targetRef="EndEvent_IT" />
+    <bpmn:endEvent id="EndEvent_IT" name="IT Setup Complete">
+      <bpmn:incoming>Flow_Create_to_End</bpmn:incoming>
+      <bpmn:incoming>Flow_ManualIT_to_End</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>

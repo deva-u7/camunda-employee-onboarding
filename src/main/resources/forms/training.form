@@ -1,0 +1,18 @@
+{
+  "id": "Form_Training",
+  "type": "default",
+  "schemaVersion": 16,
+  "components": [
+    { "type": "textfield", "id": "field_trainingModule", "key": "trainingModule", "label": "Training Module",            "disabled": true },
+    { "type": "textfield", "id": "field_trainingLevel",  "key": "trainingLevel",  "label": "Training Level (from DMN)", "disabled": true,
+      "description": "Determined automatically by the training plan decision table."
+    },
+    { "type": "separator", "id": "sep_1" },
+    { "type": "checkbox", "id": "field_trainingCompleted", "key": "trainingCompleted",
+      "label": "I have completed this training module", "validate": { "required": true }
+    },
+    { "type": "number", "id": "field_trainingScore", "key": "trainingScore",
+      "label": "Score (0 - 100)", "validate": { "min": 0, "max": 100 }
+    }
+  ]
+}

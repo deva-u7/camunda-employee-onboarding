@@ -1,0 +1,15 @@
+{
+  "id": "Form_ManualIT",
+  "type": "default",
+  "schemaVersion": 16,
+  "components": [
+    { "type": "textfield", "id": "field_it_empName", "key": "failedEmployee", "label": "Employee Name",          "disabled": true },
+    { "type": "textfield", "id": "field_it_system",  "key": "failedSystem",   "label": "System (failed account)", "disabled": true },
+    { "type": "separator", "id": "sep_1" },
+    { "type": "textarea",  "id": "field_resolutionNotes",    "key": "resolutionNotes",    "label": "Resolution Notes",
+      "description": "Describe what was done to manually provision this account.",
+      "validate": { "required": true }
+    },
+    { "type": "checkbox", "id": "field_manualAccountCreated", "key": "manualAccountCreated", "label": "Account manually created and verified" }
+  ]
+}

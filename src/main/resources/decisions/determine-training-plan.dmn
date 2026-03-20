@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="Definitions_TrainingPlan" name="Training Plan Decisions" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.44.0">
+  <decision id="determine-training-plan" name="Determine Training Plan">
+    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <input id="input_department" label="Department">
+        <inputExpression id="inputExpression_dept" typeRef="string">
+          <text>department</text>
+        </inputExpression>
+      </input>
+      <output id="output_riskLevel" label="Risk Level" name="riskLevel" typeRef="string" />
+      <output id="output_trainingLevel" label="Training Level" name="trainingLevel" typeRef="string" />
+      <output id="output_trainingDays" label="Training Days" name="trainingDays" typeRef="integer" />
+      <rule id="rule_finance">
+        <inputEntry id="ie_finance"><text>"Finance"</text></inputEntry>
+        <outputEntry id="oe_finance_risk"><text>"HIGH"</text></outputEntry>
+        <outputEntry id="oe_finance_level"><text>"ENHANCED"</text></outputEntry>
+        <outputEntry id="oe_finance_days"><text>5</text></outputEntry>
+      </rule>
+      <rule id="rule_legal">
+        <inputEntry id="ie_legal"><text>"Legal"</text></inputEntry>
+        <outputEntry id="oe_legal_risk"><text>"HIGH"</text></outputEntry>
+        <outputEntry id="oe_legal_level"><text>"ENHANCED"</text></outputEntry>
+        <outputEntry id="oe_legal_days"><text>5</text></outputEntry>
+      </rule>
+      <rule id="rule_hr">
+        <inputEntry id="ie_hr"><text>"HR"</text></inputEntry>
+        <outputEntry id="oe_hr_risk"><text>"MEDIUM"</text></outputEntry>
+        <outputEntry id="oe_hr_level"><text>"STANDARD"</text></outputEntry>
+        <outputEntry id="oe_hr_days"><text>3</text></outputEntry>
+      </rule>
+      <rule id="rule_engineering">
+        <inputEntry id="ie_engineering"><text>"Engineering"</text></inputEntry>
+        <outputEntry id="oe_engineering_risk"><text>"LOW"</text></outputEntry>
+        <outputEntry id="oe_engineering_level"><text>"STANDARD"</text></outputEntry>
+        <outputEntry id="oe_engineering_days"><text>2</text></outputEntry>
+      </rule>
+      <rule id="rule_it">
+        <inputEntry id="ie_it"><text>"IT"</text></inputEntry>
+        <outputEntry id="oe_it_risk"><text>"LOW"</text></outputEntry>
+        <outputEntry id="oe_it_level"><text>"STANDARD"</text></outputEntry>
+        <outputEntry id="oe_it_days"><text>2</text></outputEntry>
+      </rule>
+      <rule id="rule_sales">
+        <inputEntry id="ie_sales"><text>"Sales"</text></inputEntry>
+        <outputEntry id="oe_sales_risk"><text>"MEDIUM"</text></outputEntry>
+        <outputEntry id="oe_sales_level"><text>"STANDARD"</text></outputEntry>
+        <outputEntry id="oe_sales_days"><text>3</text></outputEntry>
+      </rule>
+      <rule id="rule_default">
+        <inputEntry id="ie_default"><text></text></inputEntry>
+        <outputEntry id="oe_default_risk"><text>"MEDIUM"</text></outputEntry>
+        <outputEntry id="oe_default_level"><text>"STANDARD"</text></outputEntry>
+        <outputEntry id="oe_default_days"><text>3</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
