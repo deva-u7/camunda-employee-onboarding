@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: camunda-employee-onboarding
+
+server:
+  port: 8081
+
+camunda:
+  client:
+    grpc-address: ${ZEEBE_GRPC_ADDRESS:grpc://localhost:26500}
+    rest-address: ${ZEEBE_REST_ADDRESS:http://localhost:8080}
+    security:
+      plaintext: true
+
+logging:
+  level:
+    root: WARN
+    com.devau7.onboarding: INFO
+    io.camunda.client.job.poller: ERROR

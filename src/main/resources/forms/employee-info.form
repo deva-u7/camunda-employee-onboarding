@@ -1,0 +1,38 @@
+{
+  "id": "Form_EmployeeInfo",
+  "type": "default",
+  "schemaVersion": 16,
+  "components": [
+    { "type": "textfield", "id": "field_employeeName",   "key": "employeeName",   "label": "Full Name",        "validate": { "required": true } },
+    { "type": "textfield", "id": "field_employeeEmail",  "key": "employeeEmail",  "label": "Email Address",   "validate": { "required": true } },
+    { "type": "select",    "id": "field_department",    "key": "department",    "label": "Department",      "validate": { "required": true },
+      "values": [
+        { "label": "Engineering", "value": "Engineering" },
+        { "label": "Finance",     "value": "Finance"     },
+        { "label": "HR",          "value": "HR"          },
+        { "label": "IT",          "value": "IT"          },
+        { "label": "Legal",       "value": "Legal"       },
+        { "label": "Sales",       "value": "Sales"       }
+      ]
+    },
+    { "type": "textfield", "id": "field_managerId", "key": "managerId", "label": "Manager User ID", "validate": { "required": true } },
+    { "type": "taglist",   "id": "field_systems",  "key": "systems",  "label": "Systems to Provision",
+      "values": [
+        { "label": "Email",  "value": "email"  },
+        { "label": "Slack",  "value": "slack"  },
+        { "label": "GitHub", "value": "github" },
+        { "label": "JIRA",   "value": "jira"   },
+        { "label": "Legacy", "value": "legacy" }
+      ]
+    },
+    { "type": "taglist", "id": "field_trainingModules", "key": "trainingModules", "label": "Training Modules",
+      "values": [
+        { "label": "Security Basics", "value": "Security Basics" },
+        { "label": "Code of Conduct", "value": "Code of Conduct" },
+        { "label": "Tools Setup",     "value": "Tools Setup"     },
+        { "label": "GDPR Compliance", "value": "GDPR Compliance" },
+        { "label": "Data Handling",   "value": "Data Handling"   }
+      ]
+    }
+  ]
+}

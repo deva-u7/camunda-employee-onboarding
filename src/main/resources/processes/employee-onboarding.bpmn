@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+  <bpmn:message id="Message_BGResult" name="background-check-result">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=employeeEmail" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:process id="employee-onboarding" name="Employee Onboarding" isExecutable="true">
+    <bpmn:extensionElements>
+      <zeebe:userTaskForm id="Form_EmployeeInfo">
+        {"components":[{"label":"Employee Name","key":"employeeName","id":"field_employeeName","type":"textfield","validate":{"required":true}},{"label":"Employee Email","key":"employeeEmail","id":"field_employeeEmail","type":"textfield","validate":{"required":true}},{"label":"Department","key":"department","id":"field_department","type":"textfield","validate":{"required":true}},{"label":"Manager ID","key":"managerId","id":"field_managerId","type":"textfield","validate":{"required":true}},{"label":"Systems to Provision","key":"systems","id":"field_systems","type":"taglist","values":[{"label":"Email","value":"email"},{"label":"Slack","value":"slack"},{"label":"GitHub","value":"github"},{"label":"JIRA","value":"jira"},{"label":"Legacy","value":"legacy"}]},{"label":"Training Modules","key":"trainingModules","id":"field_trainingModules","type":"taglist","values":[{"label":"Security Basics","value":"Security Basics"},{"label":"Code of Conduct","value":"Code of Conduct"},{"label":"Tools Setup","value":"Tools Setup"},{"label":"GDPR Compliance","value":"GDPR Compliance"}]}],"id":"Form_EmployeeInfo","type":"default","schemaVersion":16}
+      </zeebe:userTaskForm>
+      <zeebe:userTaskForm id="Form_HRApproval">
+        {"components":[{"label":"Employee Name","key":"employeeName","id":"field_hr_empName","type":"textfield","disabled":true},{"label":"Department","key":"department","id":"field_hr_dept","type":"textfield","disabled":true},{"label":"HR Approval Decision","key":"hrApprovalDecision","id":"field_hrDecision","type":"select","values":[{"label":"Approved","value":"APPROVED"},{"label":"Rejected","value":"REJECTED"}],"validate":{"required":true}},{"label":"HR Comments","key":"hrComments","id":"field_hrComments","type":"textarea"}],"id":"Form_HRApproval","type":"default","schemaVersion":16}
+      </zeebe:userTaskForm>
+      <zeebe:userTaskForm id="Form_Training">
+        {"components":[{"label":"Training Module","key":"trainingModule","id":"field_trainingModule","type":"textfield","disabled":true},{"label":"Training Level","key":"trainingLevel","id":"field_trainingLevel","type":"textfield","disabled":true},{"label":"Training Completed","key":"trainingCompleted","id":"field_trainingCompleted","type":"checkbox","validate":{"required":true}},{"label":"Training Score (0-100)","key":"trainingScore","id":"field_trainingScore","type":"number","validate":{"min":0,"max":100}}],"id":"Form_Training","type":"default","schemaVersion":16}
+      </zeebe:userTaskForm>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_1" name="Request">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_EmployeeInfo" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_Start_to_Validate</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_Start_to_Validate" sourceRef="StartEvent_1" targetRef="Task_ValidateData" />
+    <bpmn:serviceTask id="Task_ValidateData" name="Validate Employee Data">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="validate-employee-data" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Start_to_Validate</bpmn:incoming>
+      <bpmn:outgoing>Flow_Validate_to_Gateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_Validate_to_Gateway" sourceRef="Task_ValidateData" targetRef="Gateway_Valid" />
+    <bpmn:exclusiveGateway id="Gateway_Valid" name="Data Valid?" default="Flow_Valid">
+      <bpmn:incoming>Flow_Validate_to_Gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Valid</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0thmkle</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_Valid" name="Valid" sourceRef="Gateway_Valid" targetRef="SubProcess_BGVerification" />
+    <bpmn:endEvent id="EndEvent_Invalid" name="Onboarding&#10;Rejected">
+      <bpmn:incoming>Flow_0thmkle</bpmn:incoming>
+      <bpmn:terminateEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess_BGVerification" name="Background Verification">
+      <bpmn:incoming>Flow_Valid</bpmn:incoming>
+      <bpmn:outgoing>Flow_BGVerification_to_BGGateway</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent_BG" name="Start&#10;Verification">
+        <bpmn:outgoing>Flow_BG_Start_to_Request</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_BG_Start_to_Request" sourceRef="StartEvent_BG" targetRef="Task_RequestBGCheck" />
+      <bpmn:serviceTask id="Task_RequestBGCheck" name="Request Background Check">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="request-background-check" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_BG_Start_to_Request</bpmn:incoming>
+        <bpmn:outgoing>Flow_Request_to_EventGW</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="Flow_Request_to_EventGW" sourceRef="Task_RequestBGCheck" targetRef="Gateway_EventBased" />
+      <bpmn:eventBasedGateway id="Gateway_EventBased" name="Wait for&#10;Result or Timeout">
+        <bpmn:incoming>Flow_Request_to_EventGW</bpmn:incoming>
+        <bpmn:outgoing>Flow_EventGW_to_Message</bpmn:outgoing>
+        <bpmn:outgoing>Flow_EventGW_to_Timer</bpmn:outgoing>
+      </bpmn:eventBasedGateway>
+      <bpmn:sequenceFlow id="Flow_EventGW_to_Message" sourceRef="Gateway_EventBased" targetRef="CatchEvent_BGResult" />
+      <bpmn:intermediateCatchEvent id="CatchEvent_BGResult" name="BG Check">
+        <bpmn:incoming>Flow_EventGW_to_Message</bpmn:incoming>
+        <bpmn:outgoing>Flow_BGResult_to_End</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MsgDef_BGResult" messageRef="Message_BGResult" />
+      </bpmn:intermediateCatchEvent>
+      <bpmn:sequenceFlow id="Flow_BGResult_to_End" sourceRef="CatchEvent_BGResult" targetRef="EndEvent_BGSub" />
+      <bpmn:endEvent id="EndEvent_BGSub" name="Result Received">
+        <bpmn:incoming>Flow_BGResult_to_End</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_EventGW_to_Timer" sourceRef="Gateway_EventBased" targetRef="CatchEvent_BGTimeout" />
+      <bpmn:intermediateCatchEvent id="CatchEvent_BGTimeout" name="72h — No Response">
+        <bpmn:incoming>Flow_EventGW_to_Timer</bpmn:incoming>
+        <bpmn:outgoing>Flow_BGTimeout_to_End</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="TimerDef_BGTimeout">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT72H</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:sequenceFlow id="Flow_BGTimeout_to_End" sourceRef="CatchEvent_BGTimeout" targetRef="EndEvent_BGTimedOut" />
+      <bpmn:endEvent id="EndEvent_BGTimedOut" name="Timed Out">
+        <bpmn:incoming>Flow_BGTimeout_to_End</bpmn:incoming>
+      </bpmn:endEvent>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_BGVerification_to_BGGateway" sourceRef="SubProcess_BGVerification" targetRef="Gateway_BGPassed" />
+    <bpmn:exclusiveGateway id="Gateway_BGPassed" name="Background Passed?" default="Flow_BGPassed">
+      <bpmn:incoming>Flow_BGVerification_to_BGGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_BGFailed</bpmn:outgoing>
+      <bpmn:outgoing>Flow_BGPassed</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_BGFailed" name="Failed / Timeout" sourceRef="Gateway_BGPassed" targetRef="EndEvent_Rejected">
+      <bpmn:conditionExpression>=bgCheckPassed != true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_BGPassed" name="Passed" sourceRef="Gateway_BGPassed" targetRef="Gateway_ParallelSplit" />
+    <bpmn:endEvent id="EndEvent_Rejected" name="Onboarding Rejected">
+      <bpmn:incoming>Flow_BGFailed</bpmn:incoming>
+      <bpmn:terminateEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:parallelGateway id="Gateway_ParallelSplit" name="Setup in Parallel">
+      <bpmn:incoming>Flow_BGPassed</bpmn:incoming>
+      <bpmn:outgoing>Flow_Split_to_HRApproval</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Split_to_ITSetup</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_Split_to_HRApproval" sourceRef="Gateway_ParallelSplit" targetRef="Task_HRApproval" />
+    <bpmn:userTask id="Task_HRApproval" name="HR Approval">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_HRApproval" />
+        <zeebe:assignmentDefinition assignee="hr.manager" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Split_to_HRApproval</bpmn:incoming>
+      <bpmn:outgoing>Flow_HR_to_Decision</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryTimer_HRReminder" cancelActivity="false" attachedToRef="Task_HRApproval">
+      <bpmn:outgoing>Flow_HRReminder_to_SendReminder</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_HRReminder">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_HRReminder_to_SendReminder" sourceRef="BoundaryTimer_HRReminder" targetRef="Task_SendHRReminder" />
+    <bpmn:serviceTask id="Task_SendHRReminder" name="Send HR Approval Reminder">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="send-notification" />
+        <zeebe:ioMapping>
+          <zeebe:input source="&#34;REMINDER&#34;" target="notificationType" />
+          <zeebe:input source="&#34;HR approval is pending — please review and approve the onboarding request&#34;" target="notificationMessage" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_HRReminder_to_SendReminder</bpmn:incoming>
+      <bpmn:outgoing>Flow_SendHRReminder_to_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_SendHRReminder_to_End" sourceRef="Task_SendHRReminder" targetRef="EndEvent_HRReminder" />
+    <bpmn:endEvent id="EndEvent_HRReminder" name="Reminder Sent">
+      <bpmn:incoming>Flow_SendHRReminder_to_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Split_to_ITSetup" sourceRef="Gateway_ParallelSplit" targetRef="CallActivity_ITSetup" />
+    <bpmn:callActivity id="CallActivity_ITSetup" name="IT Account Setup">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="it-account-setup" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=systems" target="systems" />
+          <zeebe:input source="=employeeName" target="employeeName" />
+          <zeebe:input source="=employeeEmail" target="employeeEmail" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Split_to_ITSetup</bpmn:incoming>
+      <bpmn:outgoing>Flow_ITSetup_to_Join</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_ITSetup_to_Join" sourceRef="CallActivity_ITSetup" targetRef="Gateway_ParallelJoin" />
+    <bpmn:parallelGateway id="Gateway_ParallelJoin">
+      <bpmn:incoming>Flow_ITSetup_to_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_HRApproved</bpmn:incoming>
+      <bpmn:outgoing>Flow_Join_to_EvalPlan</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_Join_to_EvalPlan" sourceRef="Gateway_ParallelJoin" targetRef="Task_EvaluateTrainingPlan" />
+    <bpmn:endEvent id="EndEvent_HRRejected" name="Onboarding Rejected by HR">
+      <bpmn:incoming>Flow_HRRejected</bpmn:incoming>
+      <bpmn:terminateEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:businessRuleTask id="Task_EvaluateTrainingPlan" name="Determine Training Plan">
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="determine-training-plan" resultVariable="trainingPlan" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=trainingPlan.trainingLevel" target="trainingLevel" />
+          <zeebe:output source="=trainingPlan.riskLevel" target="riskLevel" />
+          <zeebe:output source="=trainingPlan.trainingDays" target="trainingDays" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Join_to_EvalPlan</bpmn:incoming>
+      <bpmn:outgoing>Flow_EvalPlan_to_Training</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_EvalPlan_to_Training" sourceRef="Task_EvaluateTrainingPlan" targetRef="Task_Training" />
+    <bpmn:userTask id="Task_Training" name="Complete Training">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_Training" />
+        <zeebe:assignmentDefinition assignee="new.employee" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_EvalPlan_to_Training</bpmn:incoming>
+      <bpmn:outgoing>Flow_Training_to_SendWelcome</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true">
+        <bpmn:extensionElements>
+          <zeebe:loopCharacteristics inputCollection="=trainingModules" inputElement="trainingModule" outputCollection="trainingResults" outputElement="=trainingCompleted" />
+        </bpmn:extensionElements>
+      </bpmn:multiInstanceLoopCharacteristics>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_Training_to_SendWelcome" sourceRef="Task_Training" targetRef="Task_SendWelcome" />
+    <bpmn:serviceTask id="Task_SendWelcome" name="Send Welcome Notification">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="send-notification" />
+        <zeebe:ioMapping>
+          <zeebe:input source="&#34;WELCOME&#34;" target="notificationType" />
+          <zeebe:input source="=employeeName" target="employeeName" />
+          <zeebe:input source="=employeeEmail" target="employeeEmail" />
+          <zeebe:input source="&#34;Welcome aboard! Your onboarding is complete.&#34;" target="notificationMessage" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Training_to_SendWelcome</bpmn:incoming>
+      <bpmn:outgoing>Flow_SendWelcome_to_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_SendWelcome_to_End" sourceRef="Task_SendWelcome" targetRef="EndEvent_Complete" />
+    <bpmn:endEvent id="EndEvent_Complete" name="Onboarding Complete">
+      <bpmn:incoming>Flow_SendWelcome_to_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_HR_to_Decision" sourceRef="Task_HRApproval" targetRef="Gateway_HRDecision" />
+    <bpmn:exclusiveGateway id="Gateway_HRDecision" default="Flow_HRApproved">
+      <bpmn:incoming>Flow_HR_to_Decision</bpmn:incoming>
+      <bpmn:outgoing>Flow_HRRejected</bpmn:outgoing>
+      <bpmn:outgoing>Flow_HRApproved</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_HRRejected" sourceRef="Gateway_HRDecision" targetRef="EndEvent_HRRejected">
+      <bpmn:conditionExpression>=hrApprovalDecision = "REJECTED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0thmkle" sourceRef="Gateway_Valid" targetRef="EndEvent_Invalid">
+      <bpmn:conditionExpression>=validationPassed != true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_HRApproved" name="Approved" sourceRef="Gateway_HRDecision" targetRef="Gateway_ParallelJoin" />
+  </bpmn:process>
+</bpmn:definitions>
